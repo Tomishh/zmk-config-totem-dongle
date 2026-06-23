@@ -43,10 +43,10 @@ jobs:
           path: zmk
           submodules: recursive
 
-      - name: Setup Zephyr
-        uses: zmkfirmware/setup-zmk@v2
+      - name: Install Zephyr SDK
+        uses: zephyrproject-rtos/actions/zephyr-sdk@v2
         with:
-          zephyr-version: 3.5.0
+          version: 0.16.3
 
       - name: Cache west modules
         uses: actions/cache@v4
