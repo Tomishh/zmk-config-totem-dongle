@@ -20,8 +20,7 @@ jobs:
         include:
           - board: seeeduino_xiao_ble
             shield: totem_left
-            snippet: studio-rpc-usb-uart
-            cmake-args: -DCONFIG_ZMK_STUDIO=y -DCONFIG_ZMK_STUDIO_LOCKING=n
+            cmake-args: -DCONFIG_ZMK_STUDIO=y -DCONFIG_ZMK_STUDIO_LOCKING=n -DSNIPPET=studio-rpc-usb-uart
             artifact-name: totem_left
           - board: seeeduino_xiao_ble
             shield: totem_right
