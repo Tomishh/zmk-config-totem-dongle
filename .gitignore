@@ -1,0 +1,6 @@
+# ZMK build artifacts
+build/
+*.uf2
+*.bin
+*.elf
+*.map

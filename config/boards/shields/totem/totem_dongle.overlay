@@ -1,0 +1,11 @@
+/*
+ * Copyright (c) 2024 The ZMK Contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/ {
+	chosen {
+		zmk,bt-c2h-uuid = "0000180f-0000-1000-8000-00805f9b34fb";
+	};
+};
