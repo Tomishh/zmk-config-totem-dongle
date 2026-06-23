@@ -1,0 +1,85 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.board }} / ${{ matrix.shield }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - board: seeeduino_xiao_ble
+            shield: totem_left
+            snippet: studio-rpc-usb-uart
+            cmake-args: -DCONFIG_ZMK_STUDIO=y -DCONFIG_ZMK_STUDIO_LOCKING=n
+            artifact-name: totem_left
+          - board: seeeduino_xiao_ble
+            shield: totem_right
+            artifact-name: totem_right
+          - board: seeeduino_xiao_ble
+            shield: totem_dongle prospector_adapter
+            artifact-name: totem_dongle
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Checkout ZMK
+        uses: actions/checkout@v4
+        with:
+          repository: zmkfirmware/zmk
+          ref: v0.3
+          path: zmk
+          submodules: recursive
+
+      - name: Setup Zephyr
+        uses: zmkfirmware/setup-zmk@v2
+        with:
+          zephyr-version: 3.5.0
+
+      - name: Cache west modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/west
+            zmk/modules
+          key: ${{ runner.os }}-west-${{ hashFiles('config/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-west-
+
+      - name: Install west packages
+        run: |
+          cd zmk
+          west config build.dir-fmt '@b'
+          west update
+          west zephyr-export
+
+      - name: Build
+        run: |
+          cd zmk
+          west build -b ${{ matrix.board }} -- -DSHIELD="${{ matrix.shield }}" ${{ matrix.cmake-args }}
+        env:
+          ZMK_CONFIG: ${{ github.workspace }}/config
+
+      - name: Rename artifact
+        run: |
+          mv zmk/build/zephyr/zmk.uf2 ${{ matrix.artifact-name }}.uf2
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-name }}.uf2
+          retention-days: 30
