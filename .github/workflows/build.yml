@@ -44,9 +44,11 @@ jobs:
           submodules: recursive
 
       - name: Install Zephyr SDK
-        uses: zephyrproject-rtos/actions/zephyr-sdk@v2
-        with:
-          version: 0.16.3
+        run: |
+          wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.16.3/zephyr-sdk-0.16.3_linux-x86_64.tar.gz
+          tar -xzf zephyr-sdk-0.16.3_linux-x86_64.tar.gz -C /opt
+          /opt/zephyr-sdk-0.16.3/setup.sh -t all -y
+          echo "ZEPHYR_SDK_INSTALL_DIR=/opt/zephyr-sdk-0.16.3" >> $GITHUB_ENV
 
       - name: Cache west modules
         uses: actions/cache@v4
@@ -71,6 +73,7 @@ jobs:
           west build -b ${{ matrix.board }} -- -DSHIELD="${{ matrix.shield }}" ${{ matrix.cmake-args }}
         env:
           ZMK_CONFIG: ${{ github.workspace }}/config
+          ZEPHYR_SDK_INSTALL_DIR: /opt/zephyr-sdk-0.16.3
 
       - name: Rename artifact
         run: |
